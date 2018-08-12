@@ -2,13 +2,14 @@ const passport = require("passport");
 const LinkedInStrategy = require("passport-linkedin-token-oauth2").Strategy;
 const User = require("../models/User");
 const { linkedinKey, linkedinSecret } = require("./config");
-const fs = require("fs");
+
+const profileURL =
+  "https://api.linkedin.com/v1/people/~:(id,email-address,first-name,last-name,formatted-name,picture-url,headline,location,summary,positions,skills,date-of-birth)?format=json";
 
 const options = {
   clientID: linkedinKey,
   clientSecret: linkedinSecret,
-  profileURL:
-    "https://api.linkedin.com/v1/people/~:(id,email-address,first-name,last-name,formatted-name,picture-url,headline,location,summary,positions,skills,date-of-birth)?format=json"
+  profileURL
 };
 
 const callback = async (accessToken, refreshToken, profile, done) => {
@@ -31,7 +32,5 @@ const callback = async (accessToken, refreshToken, profile, done) => {
 };
 
 passport.use(new LinkedInStrategy(options, callback));
-
-// init();
 
 module.exports = passport;

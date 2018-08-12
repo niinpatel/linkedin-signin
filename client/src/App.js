@@ -7,7 +7,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      user: null
+      user: null // logged in user
     };
   }
 
@@ -37,7 +37,10 @@ class App extends Component {
 
   callback = ({ code, redirectUri }) => {
     axios
-      .post("http://localhost:5000/get-linkedin-token", { code, redirectUri })
+      .post("http://localhost:5000/auth/linkedin/get-linkedin-token", {
+        code,
+        redirectUri
+      })
       .then(res => {
         axios
           .post("http://localhost:5000/auth/linkedin/token", res.data)
