@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const axios = require("axios");
 const qs = require("qs");
-const { linkedinKey, linkedinSecret } = require("../config/config");
+const { linkedinKey, linkedinSecret, jwtSecret } = require("../config/config");
 
 // @path auth/linkedin/get-linkedin-token
 // @desc get auth token from linkedin
@@ -34,7 +34,7 @@ router.post(
   passport.authenticate("linkedin-token", { session: false }),
   (req, res) => {
     if (req.user) {
-      let token = jwt.sign({ id: req.user.id }, "secret", {
+      let token = jwt.sign({ id: req.user.id }, jwtSecret, {
         expiresIn: 60 * 120
       });
 

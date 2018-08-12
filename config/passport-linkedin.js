@@ -4,7 +4,7 @@ const User = require("../models/User");
 const { linkedinKey, linkedinSecret } = require("./config");
 
 const profileURL =
-  "https://api.linkedin.com/v1/people/~:(id,email-address,first-name,last-name,formatted-name,picture-url,headline,location,summary,positions,skills,date-of-birth)?format=json";
+  "https://api.linkedin.com/v1/people/~:(id,email-address,first-name,last-name,formatted-name,picture-url,headline,location,summary,positions,skills,date-of-birth,public-profile-url)?format=json";
 
 const options = {
   clientID: linkedinKey,
@@ -20,7 +20,8 @@ const callback = async (accessToken, refreshToken, profile, done) => {
       email: profile._json.emailAddress,
       headline: profile._json.headline,
       location: profile._json.location.name,
-      summary: profile._json.summary
+      summary: profile._json.summary,
+      linkedinProfileURL: profile._json.publicProfileUrl
     },
     {
       new: true,

@@ -1,6 +1,6 @@
 const express = require("express");
 const passport = require("passport");
-const { port } = require("./config/config");
+const { port, jwtSecret } = require("./config/config");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const expressJwt = require("express-jwt");
@@ -31,7 +31,7 @@ app.use("/auth/linkedin/", authLinkedin);
 app.get(
   "/get-logged-user",
   expressJwt({
-    secret: "secret",
+    secret: jwtSecret,
     requestProperty: "auth"
   }),
   async (req, res) => {

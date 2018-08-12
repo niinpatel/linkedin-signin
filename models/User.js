@@ -6,7 +6,9 @@ const userSchema = new Schema({
   name: String,
   email: String,
   headline: String,
-  location: String
+  location: String,
+  summary: String,
+  linkedinProfileURL: String
 });
 
 module.exports = mongoose.model("User", userSchema);
