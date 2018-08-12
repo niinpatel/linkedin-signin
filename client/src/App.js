@@ -7,31 +7,73 @@ class App extends Component {
     super(props);
 
     this.state = {
-      code: "",
-      redirectUri: ""
+      user: null
     };
   }
-  callback = ({ code, redirectUri }) => {
-    console.log(code, redirectUri);
 
+  componentDidMount() {
+    if (localStorage.jwt) {
+      axios
+        .get("http://localhost:5000/get-logged-user", {
+          headers: { Authorization: `Bearer ${localStorage.jwt}` }
+        })
+        .then(res => {
+          this.setState({
+            user: res.data
+          });
+        })
+        .catch(err => {
+          console.log("e", err);
+        });
+    }
+  }
+
+  logout = () => {
+    localStorage.jwt = "";
+    this.setState({
+      user: null
+    });
+  };
+
+  callback = ({ code, redirectUri }) => {
     axios
       .post("http://localhost:5000/get-linkedin-token", { code, redirectUri })
       .then(res => {
         axios
           .post("http://localhost:5000/auth/linkedin/token", res.data)
-          .then(console.log)
+          .then(res => {
+            localStorage.jwt = res.data.jwt;
+            this.setState({
+              user: res.data.user
+            });
+          })
           .catch(err => console.log("errrr", err));
       })
       .catch(err => console.log("err", err));
   };
 
   render() {
-    return (
+    // if user not authenticated, show linkedin button
+    // else show user data
+    const scope = [
+      "r_basicprofile",
+      "r_emailaddress",
+      "w_share",
+      "rw_company_admin"
+    ];
+    return this.state.user ? (
+      <div>
+        {this.state.user.linkedinId}
+
+        <button onClick={this.logout}>Logout</button>
+      </div>
+    ) : (
       <div>
         <LinkedIn
           text="Login Now"
-          clientId="81oynrgqpfcd7f"
+          clientId="81hgqjt8upjpv4"
           callback={this.callback}
+          scope={scope}
         />
       </div>
     );

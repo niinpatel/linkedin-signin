@@ -12,6 +12,9 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 const qs = require("qs");
+const jwt = require("jsonwebtoken");
+const expressJwt = require("express-jwt");
+const User = require("./models/User");
 
 // initialize express application
 const app = express();
@@ -42,13 +45,23 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+require("./config/passport-linkedin");
+
 // passport config
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/get-logged-user", (req, res) => {
-  res.json(req.user);
-});
+app.get(
+  "/get-logged-user",
+  expressJwt({
+    secret: "secret",
+    requestProperty: "auth"
+  }),
+  async (req, res) => {
+    let user = await User.findById(req.auth.id);
+    res.json(user);
+  }
+);
 
 app.post("/get-linkedin-token", (req, res) => {
   const { code, redirectUri } = req.body;
@@ -71,11 +84,14 @@ app.post("/get-linkedin-token", (req, res) => {
 
 app.post(
   "/auth/linkedin/token",
-  passport.authenticate("linkedin-token"),
+  passport.authenticate("linkedin-token", { session: false }),
   (req, res) => {
     if (req.user) {
-      console.log(req.user);
-      return res.json(req.user);
+      let token = jwt.sign({ id: req.user.id }, "secret", {
+        expiresIn: 60 * 120
+      });
+
+      return res.json({ user: req.user, jwt: token });
     } else console.log("error");
 
     return res.status(401).json({ error: "no user found" });
