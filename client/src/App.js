@@ -14,7 +14,7 @@ class App extends Component {
   componentDidMount() {
     if (localStorage.jwt) {
       axios
-        .get("http://localhost:5000/get-logged-user", {
+        .get("/get-logged-user", {
           headers: { Authorization: `Bearer ${localStorage.jwt}` }
         })
         .then(res => {
@@ -37,13 +37,13 @@ class App extends Component {
 
   callback = ({ code, redirectUri }) => {
     axios
-      .post("http://localhost:5000/auth/linkedin/get-linkedin-token", {
+      .post("/auth/linkedin/get-linkedin-token", {
         code,
         redirectUri
       })
       .then(res => {
         axios
-          .post("http://localhost:5000/auth/linkedin/token", res.data)
+          .post("/auth/linkedin/token", res.data)
           .then(res => {
             localStorage.jwt = res.data.jwt;
             this.setState({
