@@ -1,15 +1,12 @@
 const passport = require("passport");
-const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
+const LinkedInStrategy = require("passport-linkedin-token-oauth2").Strategy;
 const init = require("./passport-init");
 const User = require("../models/User");
 const { linkedinKey, linkedinSecret } = require("./config");
 
 const options = {
   clientID: linkedinKey,
-  clientSecret: linkedinSecret,
-  callbackURL: "http://127.0.0.1:5000/auth/linkedin/callback",
-  scope: ["r_basicprofile"],
-  state: true
+  clientSecret: linkedinSecret
 };
 
 const callback = (accessToken, refreshToken, profile, done) => {
