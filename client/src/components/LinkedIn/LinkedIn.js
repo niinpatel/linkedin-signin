@@ -8,23 +8,19 @@ class LinkedIn extends Component {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
 
-    if (!redirectUri || !state || !code || state !== urlParams.get("state")) {
-      return;
-    }
-
-    let newURL = window.location.href.replace(
-      `code=${code}&state=${state}`,
-      ""
-    );
-    if (newURL.endsWith("?")) {
-      newURL = newURL.slice(0, -1);
-    }
-    window.history.replaceState(null, null, newURL);
-
     localStorage.linkedInReactLogin = "";
     localStorage.linkedInReactLoginRedirectUri = "";
+    window.history.replaceState(null, null, "/");
 
-    this.props.callback({ code, redirectUri });
+    if (
+      !redirectUri ||
+      !state ||
+      !code ||
+      state !== urlParams.get("state") ||
+      urlParams.get("error")
+    ) {
+      return;
+    } else this.props.callback({ code, redirectUri });
   }
 
   start = () => {

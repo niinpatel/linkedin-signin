@@ -60,7 +60,7 @@ class App extends Component {
       })
       .then(res => {
         axios.post("/auth/linkedin/token", res.data).then(res => {
-          this.logout(); // logout user if there's error
+          localStorage.jwt = res.data.jwt;
           this.setState({
             user: res.data.user,
             fetchingData: false
