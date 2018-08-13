@@ -35,8 +35,13 @@ app.get(
     requestProperty: "auth"
   }),
   async (req, res) => {
-    let user = await User.findById(req.auth.id);
-    res.json(user);
+    try {
+      let user = await User.findById(req.auth.id);
+      res.json(user);
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ error: JSON.stringify(err) });
+    }
   }
 );
 

@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import LinkedIn from "./components/LinkedIn/LinkedIn";
 import axios from "axios";
-import { FaMapMarkerAlt, FaEnvelope, FaUserAlt } from "react-icons/fa";
+import ShowUserData from "./components/ShowUserData";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 class App extends Component {
   constructor(props) {
@@ -9,7 +11,8 @@ class App extends Component {
 
     this.state = {
       user: null, // logged in user, null if no one is logged in
-      fetchingData: false // check if client is fetching data
+      fetchingData: false, // check if client is fetching data
+      error: "" // to display errors from server
     };
   }
 
@@ -30,6 +33,11 @@ class App extends Component {
         })
         .catch(err => {
           console.log("e", err);
+          this.setState({
+            error: JSON.stringify(err),
+            fetchingData: false
+          });
+          this.logout(); // logout user if there's error
         });
     }
   }
@@ -51,18 +59,22 @@ class App extends Component {
         redirectUri
       })
       .then(res => {
-        axios
-          .post("/auth/linkedin/token", res.data)
-          .then(res => {
-            localStorage.jwt = res.data.jwt;
-            this.setState({
-              user: res.data.user,
-              fetchingData: false
-            });
-          })
-          .catch(err => console.log("errrr", err));
+        axios.post("/auth/linkedin/token", res.data).then(res => {
+          this.logout(); // logout user if there's error
+          this.setState({
+            user: res.data.user,
+            fetchingData: false
+          });
+        });
       })
-      .catch(err => console.log("err", err));
+      .catch(err => {
+        console.log(err);
+        this.logout(); // logout user if there's error
+        this.setState({
+          error: JSON.stringify(err),
+          fetchingData: false
+        });
+      });
   };
 
   render() {
@@ -74,63 +86,32 @@ class App extends Component {
     ];
     const clientId = "81hgqjt8upjpv4";
 
-    const { user, fetchingData } = this.state;
+    const { user, fetchingData, error } = this.state;
 
     return (
       <div className="container">
-        <div className="header clearfix mt-5">
-          <h3 className="text-muted">Your LinkedIN Profile</h3>
-        </div>
+        <Header />
+
+        {/* if user not authenticated, show linkedin button else show user data */}
         <div className="jumbotron">
-          {/* if user not authenticated, show linkedin button else show user data */}
+          {/*Display error message if there's any */}
+          {error && `There was an error.. ${error}`}
           {/*display the message if client is fetching data*/}
           {(fetchingData && "Fetching data... ") ||
             (!user ? (
-              <div>
-                <LinkedIn
-                  text="Login with LinkedIN"
-                  clientId={clientId}
-                  callback={this.callback}
-                  scope={scope}
-                  className="btn btn-primary"
-                />
-              </div>
+              <LinkedIn
+                text="Login with LinkedIN"
+                clientId={clientId}
+                callback={this.callback}
+                scope={scope}
+                className="btn btn-primary"
+              />
             ) : (
-              <div>
-                <h1>{user.name}</h1>
-                <p className="lead">{user.headline}</p>
-
-                <p>{user.summary}</p>
-                <p>
-                  <a
-                    className="btn btn-lg btn-success"
-                    href={user.linkedinProfileURL}
-                    role="button"
-                  >
-                    <FaUserAlt /> Visit LinkedIn Profile
-                  </a>
-                </p>
-
-                <p>
-                  <FaEnvelope /> {user.email}
-                </p>
-                <p>
-                  <FaMapMarkerAlt /> {user.location}
-                </p>
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={this.logout}
-                >
-                  Log Out
-                </button>
-              </div>
+              <ShowUserData user={user} logout={this.logout} />
             ))}
         </div>
-        <footer className="footer">
-          <p>&copy; {new Date().getFullYear()}</p>
-        </footer>
+
+        <Footer />
       </div>
     );
   }

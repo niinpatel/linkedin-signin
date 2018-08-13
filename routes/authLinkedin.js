@@ -24,7 +24,10 @@ router.post("/get-linkedin-token", (req, res) => {
       qs.stringify(requestOptions)
     )
     .then(data => res.json(data.data))
-    .catch(err => console.log("err", err));
+    .catch(err => {
+      console.log(err);
+      return res.status(401).json({ error: JSON.stringify(err) });
+    });
 });
 
 // @path auth/linkedin/token
@@ -39,9 +42,10 @@ router.post(
       });
 
       return res.json({ user: req.user, jwt: token });
-    } else console.log("error");
-
-    return res.status(401).json({ error: "no user found" });
+    } else {
+      console.log("error");
+      return res.status(401).json({ error: "Token could not be verified" });
+    }
   }
 );
 
