@@ -1,27 +1,55 @@
 import React, { Component } from "react";
 import getURL from "./getURL";
+import PropTypes from "prop-types";
 
 class LinkedIn extends Component {
+  static propTypes = {
+    clientId: PropTypes.string,
+    callback: PropTypes.func.isRequired,
+    className: PropTypes.string,
+    text: PropTypes.node,
+    scope: PropTypes.arrayOf(PropTypes.string)
+  };
+
   componentDidMount() {
-    const state = localStorage.linkedInReactLogin;
-    const redirectUri = localStorage.linkedInReactLoginRedirectUri;
+    this.restart();
+  }
+
+  restart = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
+    const redirectUri = localStorage.linkedInReactLoginRedirectUri;
+    const previousState = localStorage.linkedInReactLogin;
 
     localStorage.linkedInReactLogin = "";
     localStorage.linkedInReactLoginRedirectUri = "";
-    window.history.replaceState(null, null, "/");
 
-    if (
-      !redirectUri ||
-      !state ||
-      !code ||
-      state !== urlParams.get("state") ||
-      urlParams.get("error")
-    ) {
+    const newState = urlParams.get("state");
+    const code = urlParams.get("code");
+
+    let newURL = window.location.pathname;
+    urlParams.delete("state");
+
+    if (urlParams.get("error")) {
+      urlParams.delete("error");
+      urlParams.delete("error_description");
+      if (urlParams.toString()) {
+        newURL = newURL + "?" + urlParams.toString();
+      }
+
+      window.history.replaceState(null, null, newURL);
       return;
-    } else this.props.callback({ code, redirectUri });
-  }
+    }
+
+    urlParams.delete("code");
+    if (urlParams.toString()) {
+      newURL = newURL + "?" + urlParams.toString();
+    }
+    window.history.replaceState(null, null, newURL);
+
+    if (redirectUri && code && previousState === newState) {
+      this.props.callback({ code, redirectUri });
+    }
+  };
 
   start = () => {
     const { clientId, scope } = this.props;
