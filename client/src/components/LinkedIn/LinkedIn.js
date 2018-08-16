@@ -17,37 +17,31 @@ class LinkedIn extends Component {
 
   restart = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const redirectUri = localStorage.linkedInReactLoginRedirectUri;
-    const previousState = localStorage.linkedInReactLogin;
+    const redirectUri = localStorage.linkedInReactRedirectUri;
+    const previousState = localStorage.linkedInReactState;
 
-    localStorage.linkedInReactLogin = "";
-    localStorage.linkedInReactLoginRedirectUri = "";
+    localStorage.linkedInReactState = "";
+    localStorage.linkedInReactRedirectUri = "";
 
     const newState = urlParams.get("state");
     const code = urlParams.get("code");
+    const error = urlParams.get("error");
 
     let newURL = window.location.pathname;
     urlParams.delete("state");
-
-    if (urlParams.get("error")) {
-      urlParams.delete("error");
-      urlParams.delete("error_description");
-      if (urlParams.toString()) {
-        newURL = newURL + "?" + urlParams.toString();
-      }
-
-      window.history.replaceState(null, null, newURL);
-      return;
-    }
-
+    urlParams.delete("error");
+    urlParams.delete("error_description");
     urlParams.delete("code");
     if (urlParams.toString()) {
       newURL = newURL + "?" + urlParams.toString();
     }
+
     window.history.replaceState(null, null, newURL);
 
-    if (redirectUri && code && previousState === newState) {
-      this.props.callback({ code, redirectUri });
+    if (error) {
+      this.props.callback(error, null, null);
+    } else if (redirectUri && code && previousState === newState) {
+      this.props.callback(null, code, redirectUri);
     }
   };
 
@@ -56,8 +50,8 @@ class LinkedIn extends Component {
     const state = Math.random()
       .toString(36)
       .substring(7);
-    localStorage.linkedInReactLogin = state;
-    localStorage.linkedInReactLoginRedirectUri = window.location.href;
+    localStorage.linkedInReactState = state;
+    localStorage.linkedInReactRedirectUri = window.location.href;
     window.location.href = getURL(clientId, state, scope); // build url out of clientid, scope and state
   };
 

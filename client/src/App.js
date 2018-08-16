@@ -49,32 +49,39 @@ class App extends Component {
     });
   };
 
-  callback = ({ code, redirectUri }) => {
-    this.setState({
-      fetchingData: true
-    });
-    axios
-      .post("/auth/linkedin/get-linkedin-token", {
-        code,
-        redirectUri
-      })
-      .then(res => {
-        axios.post("/auth/linkedin/token", res.data).then(res => {
-          localStorage.jwt = res.data.jwt;
+  callback = (error, code, redirectUri) => {
+    if (error) {
+      this.setState({
+        error: error
+      });
+      return;
+    } else {
+      this.setState({
+        fetchingData: true
+      });
+      axios
+        .post("/auth/linkedin/get-linkedin-token", {
+          code,
+          redirectUri
+        })
+        .then(res => {
+          axios.post("/auth/linkedin/token", res.data).then(res => {
+            localStorage.jwt = res.data.jwt;
+            this.setState({
+              user: res.data.user,
+              fetchingData: false
+            });
+          });
+        })
+        .catch(err => {
+          console.log(err);
+          this.logout(); // logout user if there's error
           this.setState({
-            user: res.data.user,
+            error: JSON.stringify(err),
             fetchingData: false
           });
         });
-      })
-      .catch(err => {
-        console.log(err);
-        this.logout(); // logout user if there's error
-        this.setState({
-          error: JSON.stringify(err),
-          fetchingData: false
-        });
-      });
+    }
   };
 
   render() {
