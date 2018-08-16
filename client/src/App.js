@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import LinkedIn from "./components/LinkedIn/LinkedIn";
+import LinkedIn from "linkedin-login-for-react";
 import axios from "axios";
 import ShowUserData from "./components/ShowUserData";
 import Footer from "./components/Footer";
