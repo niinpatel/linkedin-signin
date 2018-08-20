@@ -4,6 +4,7 @@ import axios from "axios";
 import ShowUserData from "./components/ShowUserData";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
+import jwt_decode from "jwt-decode";
 
 class App extends Component {
   constructor(props) {
@@ -18,6 +19,12 @@ class App extends Component {
 
   componentDidMount() {
     if (localStorage.jwt) {
+      // Check if token is not expired
+      let authInfo = jwt_decode(localStorage.jwt);
+      if (authInfo.exp < new Date() / 1000) {
+        this.logout();
+        return;
+      }
       this.setState({
         fetchingData: true
       });
